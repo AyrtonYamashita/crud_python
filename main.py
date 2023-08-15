@@ -1,6 +1,5 @@
 import pandas as pd
 import PySimpleGUI as pg
-import pyperclip as pyper
 
 file_database = pd.read_excel('DATABASE.xlsx')
 dataframe = pd.DataFrame(file_database)
@@ -9,7 +8,7 @@ layout_search = [
     [pg.Text('Digite um e-mail para busca: '),
      pg.Push(), pg.InputText(key='email'), pg.Button('Buscar', key='search_email')],
     [pg.Text('Digite uma filial para busca: '),
-     pg.Push(), pg.InputText(key='filial'), pg.Button('Buscar', key='search_filial')],
+     pg.Push(), pg.InputText(key='filial', default_text='CUIABÁ'), pg.Button('Buscar', key='search_filial')],
 ]
 
 
@@ -33,15 +32,21 @@ while True:
             """, title="Sistema de busca")
             break
     elif event == "search_filial":
-        filiais = {'FILIAL': [], 'SETOR': [], 'EMAIL': [], 'SENHA': [], 'CHANGELOG': []}
+        janela.close()
+        list_result = []
         busca_filial = dataframe.loc[dataframe["FILIAL"] == valor["filial"]]
         for i in busca_filial.index:
-            filiais['FILIAL'].append(dataframe.loc[[i], ["FILIAL"]])
-            filiais['SETOR'].append(dataframe.loc[[i], ["SETOR"]])
-            filiais['EMAIL'].append(dataframe.loc[[i], ["EMAIL"]])
-            filiais['SENHA'].append(dataframe.loc[[i], ["SENHA"]])
-            filiais['CHANGELOG'].append(dataframe.loc[[i], ["CHANGELOG"]])
-        pg.popup_scrolled(filiais['EMAIL'], title='Sistema de busca', size=(100, 50))
+            list_result.append({'FILIAL': dataframe.at[i, 'FILIAL'],
+                                'SETOR': dataframe.at[i, 'SETOR'],
+                                'EMAIL': dataframe.at[i, 'EMAIL'],
+                                'SENHA': dataframe.at[i, 'SENHA'],
+                                'CHANGELOG': dataframe.at[i, 'CHANGELOG']})
+        for index, item in enumerate(list_result):
+            print(f'FILIAL: {list_result[index]["FILIAL"]},'
+                  f'SETOR: {list_result[index]["SETOR"]},'
+                  f'EMAIL: {list_result[index]["EMAIL"]},'
+                  f'SENHA: {list_result[index]["SENHA"]},'
+                  f'CHANGELOG: {list_result[index]["CHANGELOG"]}')
         break
 
 
