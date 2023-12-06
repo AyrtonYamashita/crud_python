@@ -1,0 +1,67 @@
+.minimalistTable {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+.minimalistTable td input[type="text"] {
+    width: 100%;
+}
+
+.minimalistTable td, .minimalistTable th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.minimalistTable tr:nth-child(even){background-color: #f2f2f2;}
+.minimalistTable tr:hover {background-color: #ddd;}
+.minimalistTable th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+}
+
+h1 {
+    text-align: center;
+    padding: 20px;
+    background-color: #4CAF50;
+    color: white;
+}
+
+form {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+}
+
+input[type="submit"], button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover, button:hover {
+    background-color: #45a049;
+}

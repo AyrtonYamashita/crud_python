@@ -1,53 +1,106 @@
-import pandas as pd
-import PySimpleGUI as pg
+import psycopg2
+from flask import Flask, jsonify, request, render_template
 
-file_database = pd.read_excel('DATABASE.xlsx')
-dataframe = pd.DataFrame(file_database)
-pg.theme('DarkBlue')
-layout_search = [
-    [pg.Text('Digite um e-mail para busca: '),
-     pg.Push(), pg.InputText(key='email'), pg.Button('Buscar', key='search_email')],
-    [pg.Text('Digite uma filial para busca: '),
-     pg.Push(), pg.InputText(key='filial', default_text='CUIABÁ'), pg.Button('Buscar', key='search_filial')],
-]
+app = Flask(__name__)
 
 
-janela = pg.Window('Sistema de busca', layout_search)
-event, valor = janela.read()
-while True:
-    if event == "search_email":
-        busca_email = dataframe.loc[dataframe["EMAIL"] == valor["email"]]
-        janela.close()
-        if len(busca_email.index) == 0:
-            pg.PopupOK(f'O email "{valor["email"]}" não existe!', title="Sistema de busca")
-            break
-        else:
-            pg.popup_scrolled(f"""
-                                        EMAIL ENCONTRADO!
-            Filial: {dataframe.at[busca_email.index[0], "FILIAL"]}
-            Setor: {dataframe.at[busca_email.index[0], "SETOR"]}
-            Email: {dataframe.at[busca_email.index[0], "EMAIL"]}
-            Senha: {dataframe.at[busca_email.index[0], "SENHA"]}
-            Changelog: {dataframe.at[busca_email.index[0], "CHANGELOG"]}
-            """, title="Sistema de busca")
-            break
-    elif event == "search_filial":
-        janela.close()
-        list_result = []
-        busca_filial = dataframe.loc[dataframe["FILIAL"] == valor["filial"]]
-        for i in busca_filial.index:
-            list_result.append({'FILIAL': dataframe.at[i, 'FILIAL'],
-                                'SETOR': dataframe.at[i, 'SETOR'],
-                                'EMAIL': dataframe.at[i, 'EMAIL'],
-                                'SENHA': dataframe.at[i, 'SENHA'],
-                                'CHANGELOG': dataframe.at[i, 'CHANGELOG']})
-        for index, item in enumerate(list_result):
-            print(f'FILIAL: {list_result[index]["FILIAL"]},'
-                  f'SETOR: {list_result[index]["SETOR"]},'
-                  f'EMAIL: {list_result[index]["EMAIL"]},'
-                  f'SENHA: {list_result[index]["SENHA"]},'
-                  f'CHANGELOG: {list_result[index]["CHANGELOG"]}')
-        break
+@app.route('/')
+def hello():
+    return render_template('init.html')
 
 
+def get_db():
+    con = psycopg2.connect(
+        host='localhost',
+        database='alt',
+        user='postgres',
+        password='admin'
+    )
+    return con
 
+
+# Converte e-mail em id
+def convert(id_email):
+    con = get_db()
+    cur = con.cursor()
+    cur.execute(f"SELECT * FROM email_alt.emails WHERE id = {id_email}")
+    id_filial, filial, setor, email, senha, changelog = cur.fetchone()
+    return email
+
+
+# Busca os emails no banco de dados
+@app.route('/search/<string:item_id>', methods=['GET'])
+def get_data(item_id):
+    con = get_db()
+    cur = con.cursor()
+    if len(item_id) > 3:
+        cur.execute(f"SELECT * FROM email_alt.emails WHERE email = '{item_id}@altbrasil.com.br'")
+    elif len(item_id) == 3:
+        cur.execute(f"SELECT * FROM email_alt.emails WHERE filial = '{item_id.upper()}'")
+    item = cur.fetchall()
+    if len(item) == 0:
+        return jsonify({'erro': 'Item não encontrado'})
+    else:
+        data = {}
+        for i in item:
+            id_filial, filial, setor, email, senha, changelog = i
+            data[id_filial] = {
+                "id": id_filial,
+                "filial": filial,
+                "setor": setor,
+                "email": email,
+                "senha": senha,
+                "changelog": changelog
+            }
+        return jsonify(data)
+
+
+# Adiciona um e-mail no banco de dados
+@app.route('/search', methods=['POST'])
+def post_data():
+    data = request.get_json()
+    con = get_db()
+    cur = con.cursor()
+    try:
+        cur.execute(f"""INSERT INTO email_alt.emails (filial, setor, email, senha, changelog) VALUES
+            ('{data.get('filial')}',
+'{data.get('setor')}',
+'{data.get('email')}',
+'{data.get('senha')}',
+'{data.get('changelog')}')""")
+        con.commit()
+        return jsonify({'Status': 'E-mail adicionado com sucesso!'})
+    finally:
+        con.close()
+
+
+# Atualiza os dados de um e-mail no banco de dados
+@app.route('/update/<int:item_id>', methods=['PUT'])
+def update_data(item_id):
+    data = request.get_json()
+    new_password = data.get('senha')
+    con = get_db()
+    cur = con.cursor()
+    try:
+        cur.execute("UPDATE email_alt.emails SET senha = %s WHERE id = %s",(new_password, item_id))
+        con.commit()
+        return jsonify(data), 200
+    finally:
+        con.close()
+
+
+# Remove um e-mail do banco de dados.
+@app.route('/delete/<int:item_id>', methods=['DELETE'])
+def drop_data(item_id):
+    con = get_db()
+    cur = con.cursor()
+    try:
+        cur.execute(f"DELETE FROM email_alt.emails WHERE id = '{item_id}'")
+        con.commit()
+        return jsonify({'Status': f'O endereço de e-mail com ID {item_id} foi deletado com sucesso!'}), 200
+    finally:
+        con.close()
+
+
+if __name__ == '__main__':
+    app.run(host="26.129.154.181")
