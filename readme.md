@@ -1,7 +1,7 @@
 <h1>CRUD com Python</h1>
 <p>Este é um projeto particular de estudos utilizado para apresentação de TCC</p>
 <p>O princípio do projeto é realizar a migração de um banco de dados feito em Excel
-para um banco de dados estruturado utilizando PostgreSQL e Python.
+para um banco de dados estruturado utilizando <a href="https://www.postgresql.org/">PostgreSQL</a> e <a href="https://www.postgresql.org/">Python</a>.
 Para iniciar a migração começamos instalando o pgAdmin4 responsável por criar e gerenciar o banco inicialmente.
 
 <h2>Criando um banco de dados com pgAdmin4</h2>
@@ -56,7 +56,8 @@ Aqui você deve colocar o nome do usuário cadastrado para acesso no seu banco, 
 <li><code>password</code><br>
 Por ultimo colocamos a senha cadastrada para o nosso usuario, neste caso utilizamos <i>'admin'</i>
 
-<br><p>O resultado dessa função deve nos retornar uma conexão, como resultado final deveremos ter a seguinte configuração:
+<p>O resultado dessa função deve nos retornar uma conexão, como resultado final deveremos ter a seguinte configuração:
+    
 ```
 def get_db():
     con = psycopg2.connect(
@@ -106,7 +107,7 @@ Agora ao acessar essa rota, ele deve executar a função definida para inserir d
 Para que isso seja possível, precisamos importar o <i>request</i> da nossa biblioteca Flask:
 
 ```
-from flask import Flask, request
+from flask import Flask, render_template, request
 ```
 
 Agora importado podemos criar a variável que neste projeto iremos chamar de data, para receber os dados json utilizando o método get_json().
@@ -116,7 +117,7 @@ Agora vamos realizar uma tratativa de erros para evitar que nossa aplicação ca
 Por fim após a inserção realizamos um commit e retornamos um json com um status 200 confirmando a inserção, para isso vamos importar agora a função jsonify da biblioteca Flask.
 
 ```
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 ```
 Para finalizar a tratativa de erro utilizamos finnaly em Python, neste caso, se houver erros, a conexão com o banco deve ser encerrada com close().<br>
 Para finalizar, a função de inserção de dados na tabela ficará da seguinte maneira:
@@ -229,3 +230,9 @@ def drop_data(item_id):
     finnaly:
         con.close()
 ```
+
+<h2>Referências Bibliográficas</h2>
+<a href="https://www.python.org/">Python</a>
+<a href="https://www.postgresql.org/">PostgreSQL</a>
+<a href="https://www.psycopg.org/docs/">Documentação biblioteca psycopg2</a>
+<a href="https://flask.palletsprojects.com/en/3.0.x/quickstart/#a-minimal-application">Documentçaão biblioteca Flask</a>
