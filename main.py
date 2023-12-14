@@ -55,6 +55,30 @@ def get_data(item_id):
         return jsonify(data)
 
 
+# Busca os emails no banco de dados
+@app.route('/id/<string:item_id>', methods=['GET'])
+def get_item(item_id):
+    con = get_db()
+    cur = con.cursor()
+    cur.execute(f"SELECT * FROM email_alt.emails WHERE id = '{item_id}'")
+    item = cur.fetchall()
+    if len(item) == 0:
+        return jsonify({'erro': 'Item não encontrado'})
+    else:
+        data = {}
+        for i in item:
+            id_filial, filial, setor, email, senha, changelog = i
+            data[id_filial] = {
+                "id": id_filial,
+                "filial": filial,
+                "setor": setor,
+                "email": email,
+                "senha": senha,
+                "changelog": changelog
+            }
+        return jsonify(data)
+
+
 # Adiciona um e-mail no banco de dados
 @app.route('/search', methods=['POST'])
 def post_data():

@@ -33,9 +33,9 @@ function response(){
                 for (let prop in data[id]){
                     let cell = document.createElement('td');
                     cell.textContent = data[id][prop];
-                    cell.id = id + '-' + prop;
+                    cell.id = id;
                     cell.addEventListener('click', function(){
-                        copyToClip(cell.textContent);
+                        form_response(cell.id);
                     });
                     row.appendChild(cell);
                 }
@@ -51,8 +51,12 @@ function response(){
 
 function add_email(){
     var existForm = document.querySelector('form');
+    var existTable = document.querySelector('table');
     if(existForm){
         document.body.removeChild(existForm);
+    }
+    if(existTable){
+        document.body.removeChild(existTable);
     }
     var p = document.createElement('p');
     p.textContent = 'Adicione um e-mail preenchendo os seguintes dados:'
@@ -63,22 +67,28 @@ function add_email(){
     email.setAttribute("type", "text");
     email.setAttribute("name", "email");
     email.setAttribute("placeholder", "Email");
+    email.setAttribute("required", "True");
+    email.setAttribute("id", "email");
     var filial = document.createElement('input');
     filial.setAttribute("type", "text");
     filial.setAttribute("name", "filial");
     filial.setAttribute("placeholder", "Filial");
+    filial.setAttribute("required", "True");
+    filial.setAttribute("maxLength", "3");
     var setor = document.createElement('input');
     setor.setAttribute("type", "text");
     setor.setAttribute("name", "setor");
     setor.setAttribute("placeholder", "Setor");
+    setor.setAttribute("required", "True");
     var senha = document.createElement('input');
     senha.setAttribute("type", "password");
     senha.setAttribute("name", "senha");
     senha.setAttribute("placeholder", "Senha");
+    senha.setAttribute("required", "True");
     var changelog = document.createElement('input');
     changelog.setAttribute("type", "text");
     changelog.setAttribute("name", "changelog");
-    changelog.setAttribute("placeholder", "Changelog");
+    changelog.setAttribute("value", formatDate(today, 'yy-mm-dd'));
     var submit = document.createElement('input');
     submit.setAttribute("type", "submit");
     submit.setAttribute("id", "send");
@@ -115,6 +125,67 @@ function add_email(){
 
 }
 
+function form_response(id){
+    var existForm = document.querySelector('form');
+    var existTable = document.querySelector('table');
+    if(existForm){
+        document.body.removeChild(existForm);
+    }
+    if(existTable){
+        document.body.removeChild(existTable);
+    }
+    let form = document.createElement('form');
+    let back_button = document.createElement('button');
+    let remove_button = document.createElement('button');
+    remove_button.setAttribute("type", "submit");
+    remove_button.textContent = 'Excluir';
+    remove_button.setAttribute("id", "rmv_btn");
+    back_button.textContent = 'Voltar';
+    fetch('/id/' + id)
+    .then(response => response.json())
+    .then(data => {
+        let ids = Object.keys(data);
+        for(item of ids){
+            for (let prop in data[item]){
+                let content = document.createElement('input');
+                let name = document.createElement('p');
+                name.className = 'title_name'
+                name.textContent = prop
+                content.disabled = true;
+                content.setAttribute("type", "text");
+                content.setAttribute("value", data[item][prop]);
+                form.appendChild(name);
+                form.appendChild(content);
+            }
+        form.appendChild(back_button);
+        form.appendChild(remove_button);
+        document.body.appendChild(form);
+        document.body.querySelector('submit').addEventListener('submit', function(event){
+            event.preventDefault()
+            fetch('/delete/' + item, {method: 'DELETE'})
+            .then(response => response.json())
+            console.log('removido')
+        })
+        // document.body.querySelector('button').addEventListener('click', function(event){
+        //     event.preventDefault()
+        //     window.history.go();
+        // })
+        }
+    })
+}
+
+
 function copyToClip(item_id){
+    alert('O item: ' + item_id + ' foi copiado!');
     navigator.clipboard.writeText(item_id);
+}
+
+const today = new Date();
+function formatDate(date, format){
+    const map = {
+        mm: date.getMonth() + 1,
+        dd: date.getDate(),
+        yy: date.getFullYear()
+    };
+    return format.replace(/yy|mm|dd/gi, matched => map[matched])
 }
