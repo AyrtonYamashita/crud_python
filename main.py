@@ -62,12 +62,8 @@ def post_data():
     con = get_db()
     cur = con.cursor()
     try:
-        cur.execute(f"""INSERT INTO email_alt.emails (filial, setor, email, senha, changelog) VALUES
-            ('{data.get('filial')}',
-'{data.get('setor')}',
-'{data.get('email')}',
-'{data.get('senha')}',
-'{data.get('changelog')}')""")
+        cur.execute("INSERT INTO email_alt.emails (filial, setor, email, senha, changelog) VALUES (%s, %s, %s, %s, %s)"
+                    , (data.get('filial'),data.get('setor'),data.get('email'),data.get('senha'),data.get('changelog')))
         con.commit()
         return jsonify({'Status': 'E-mail adicionado com sucesso!'})
     finally:
@@ -78,11 +74,11 @@ def post_data():
 @app.route('/update/<int:item_id>', methods=['PUT'])
 def update_data(item_id):
     data = request.get_json()
-    new_password = data.get('senha')
     con = get_db()
     cur = con.cursor()
     try:
-        cur.execute("UPDATE email_alt.emails SET senha = %s WHERE id = %s",(new_password, item_id))
+        for key, value in data.items():
+            cur.execute(f"UPDATE email_alt.emails SET {key} = %s WHERE id = %s",(value, item_id))
         con.commit()
         return jsonify(data), 200
     finally:
@@ -103,4 +99,4 @@ def drop_data(item_id):
 
 
 if __name__ == '__main__':
-    app.run(host="192.168.0.2")
+    app.run()

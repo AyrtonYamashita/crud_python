@@ -6,16 +6,16 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" type="text/css" href="static/css/style.css">
-    <title>Controle de e-mails</title>
-    <script src="static/js/script.js"></script>
+    <title>Banco de e-mails</title>
+    <script src="static/js/script2.js"></script>
 </head>
 <body>
-    <h1>Pesquisa de Filial e E-mail</h1>
-    <form onsubmit="event.preventDefault(); search();">
+    <h1>BANCO DE E-MAILS</h1>
+    <form onsubmit="event.preventDefault(); response();">
         <label for="item_id">Digite a sigla da filial ou e-mail:</label><br>
         <input type="text" id="item_id"><br>
         <input type="submit" value="Pesquisar">
+        <input type="button" onclick="event.preventDefault(); add_email();" value="Adicionar">
     </form>
-    <div id="results"></div>
 </body>
 </html>
