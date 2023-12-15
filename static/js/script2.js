@@ -134,11 +134,14 @@ function form_response(id){
         document.body.removeChild(existTable);
     }
     let form = document.createElement('form');
+    form.setAttribute("method", "put");
+    form.setAttribute("action", "/update/" + id);
     let back_button = document.createElement('button');
     let remove_button = document.createElement('button');
-    let edit_button = document.createElement('button');
-    edit_button.textContent = 'Editar';
+    let edit_button = document.createElement('input');
+    edit_button.setAttribute("value", "Editar");
     edit_button.setAttribute("id", "edt_btn");
+    edit_button.setAttribute("type", "button");
     remove_button.textContent = 'Excluir';
     remove_button.setAttribute("id", "rmv_btn");
     back_button.textContent = 'Voltar';
@@ -147,11 +150,15 @@ function form_response(id){
     .then(response => response.json())
     .then(data => {
         let ids = Object.keys(data);
+/* REFAZER TODA ESSA FUNÇÃO DE FORM_RESPONSE;
+CRIAR DE FORMA INDEPENDENTE O FORMULÁRIO RESPONSIVO COM A RESPOSTA
+UNICA.
+*/
         for(item of ids){
             for (let prop in data[item]){
                 let content = document.createElement('input');
                 let title = document.createElement('div');
-
+                content.setAttribute("name", prop);
                 title.className = 'title_name'
                 title.textContent = prop
                 content.disabled = true;
@@ -188,31 +195,25 @@ function form_response(id){
             inputs.forEach(function(input){
                 input.disabled = false;
             });
-            edit_button.textContent = 'Confirmar'
-            edit_button.id = 'check_btn'
-            document.getElementById('check_btn')
-            .addEventListener('click', function(event){
+            edit_button.setAttribute("value", "Confirmar");
+            edit_button.setAttribute("id", "chk_btn");
+            edit_button.setAttribute("type", "submit");
+            document.body.querySelector('form').addEventListener('submit', function(event){
                 event.preventDefault()
-                let item = this.dataset.item;
-                edit_email(item);
+                console.log("a");
+                let inputs = this.elements
+                let obj = {}
+                for(let i = 0; i < inputs.length; i++){
+                    if(inputs[i].tagName.toLowerCase() === 'input'){
+                        let key = inputs[i].name
+                        let value = inputs[i].value
+                        obj[key] = value
+                    }
+                }
+                let json = JSON.stringify(obj)
+                console.log(json);
             })
         })
-        // var edt_btn = document.getElementById('edt_btn')
-        // edt_btn.addEventListener('click', function(event){
-        //     event.preventDefault()
-        //     var input = document.body.querySelectorAll('input')
-        //     input.forEach(function(input){
-        //         input.disabled = false;
-        //     });
-        // edt_btn.textContent = 'Confirmar'
-        // edt_btn.id = 'check_btn'
-        // document.getElementById('check_btn')
-        // .addEventListener('click', function(event){
-        //     event.preventDefault()
-        //     let teste = this.dataset.item;
-        //     console.log(teste)
-        //     })
-        // })
     })
 }
 
