@@ -124,106 +124,120 @@ function add_email(){
 
 }
 
-function form_response(id){
-    var existForm = document.querySelector('form');
-    var existTable = document.querySelector('table');
-    if(existForm){
-        document.body.removeChild(existForm);
+function form_response(cell_id){
+    var exist_form = document.querySelector('form');
+    var exist_table = document.querySelector('table');
+    if (exist_form){
+        document.body.removeChild(exist_form);
     }
-    if(existTable){
-        document.body.removeChild(existTable);
+    if (exist_table){
+        document.body.removeChild(exist_table);
     }
-    let form = document.createElement('form');
-    form.setAttribute("method", "put");
-    form.setAttribute("action", "/update/" + id);
-    let back_button = document.createElement('button');
-    let remove_button = document.createElement('button');
-    let edit_button = document.createElement('input');
-    edit_button.setAttribute("value", "Editar");
-    edit_button.setAttribute("id", "edt_btn");
-    edit_button.setAttribute("type", "button");
-    remove_button.textContent = 'Excluir';
-    remove_button.setAttribute("id", "rmv_btn");
-    back_button.textContent = 'Voltar';
-    back_button.setAttribute("id", "bck_btn");
-    fetch('/id/' + id)
+    let forms = document.createElement('form');
+    let back_btn = document.createElement('button');
+    let drop_btn = document.createElement('button');
+    let edit_btn = document.createElement('button');
+    let confirm_btn = document.createElement('button');
+    back_btn.setAttribute('type', 'button');
+    back_btn.textContent = 'Voltar';
+    back_btn.setAttribute('id', 'back_btn');
+    drop_btn.setAttribute('type', 'submit');
+    drop_btn.textContent = 'Excluir';
+    drop_btn.setAttribute('id', 'drop_btn');
+    edit_btn.setAttribute('type', 'button');
+    edit_btn.textContent = 'Editar';
+    edit_btn.setAttribute('id', 'edit_btn');
+    confirm_btn.setAttribute('type', 'submit');
+    confirm_btn.setAttribute('value', 'Confirmar');
+    confirm_btn.setAttribute('id', 'confirm_btn');
+    confirm_btn.textContent = 'Confirmar';
+    confirm_btn.setAttribute('hidden', '');
+    fetch('/id/' + cell_id)
     .then(response => response.json())
     .then(data => {
         let ids = Object.keys(data);
-/* REFAZER TODA ESSA FUNÇÃO DE FORM_RESPONSE;
-CRIAR DE FORMA INDEPENDENTE O FORMULÁRIO RESPONSIVO COM A RESPOSTA
-UNICA.
-*/
-        for(item of ids){
-            for (let prop in data[item]){
-                let content = document.createElement('input');
+        for (id of ids){
+            for (let property in data[id]){
+                edit_btn.dataset.id = id;
+                drop_btn.dataset.id = id;
+                let value = document.createElement('input');
                 let title = document.createElement('div');
-                content.setAttribute("name", prop);
-                title.className = 'title_name'
-                title.textContent = prop
-                content.disabled = true;
-                content.setAttribute("type", "text");
-                content.value = data[item][prop]
-                content.className = 'class_id'
-                content.id = item
+                title.setAttribute('id', 'title_id');
+                title.textContent = property;
+                value.setAttribute('id', id);
+                value.setAttribute('className', 'cls_value');
+                value.setAttribute('value', data[id][property]);
+                value.setAttribute('name', property);
+                value.disabled = true;
+                forms.appendChild(title);
+                forms.appendChild(value);
                 title.addEventListener('click', function(){
-                    copyToClip(content.value)
+                    copyToClip(value.value);
                 })
-                edit_button.dataset.item = item;
-                remove_button.dataset.item = item;
-                form.appendChild(title);
-                form.appendChild(content);
             }
-        remove_button.addEventListener('click', function(){
-            let item = this.dataset.item;
-            remove_email(item);
-
-        })
-        form.appendChild(back_button);
-        form.appendChild(edit_button);
-        form.appendChild(remove_button);
-        document.body.appendChild(form);
-        document.getElementById('bck_btn')
-        .addEventListener('click', function(event){
-            event.preventDefault()
-            window.history.go();
-        })
         }
-        edit_button.addEventListener('click', function(event){
-            event.preventDefault()
-            var inputs = document.querySelectorAll('input')
+    })
+    drop_btn.addEventListener('click', function(event){
+        event.preventDefault();
+        let item = this.dataset.id;
+        remove_email(item);
+    })
+    back_btn.addEventListener('click', function(event){
+        event.preventDefault();
+        window.history.go();
+    })
+    edit_btn.addEventListener('click', function(event){
+        event.preventDefault();
+        var inputs = document.querySelectorAll('input');
+        inputs.forEach(function(input){
+            input.disabled = false;
+        });
+        edit_btn.setAttribute('hidden', '');
+        confirm_btn.removeAttribute('hidden');
+    })
+    forms.appendChild(back_btn);
+    forms.appendChild(edit_btn);
+    forms.appendChild(drop_btn);
+    forms.appendChild(confirm_btn);
+    document.body.appendChild(forms);
+    document.body.querySelector('form').addEventListener('submit', function(event){
+        event.preventDefault();
+        let values = this.elements
+        let obj = {}
+        for (let i = 0; i < values.length; i++){
+            if (values[i].tagName.toLowerCase() === 'input'){
+                let key = values[i].name
+                let value = values[i].value
+                obj[key] = value
+            }
+        }
+        let json = JSON.stringify(obj)
+        fetch('/update/' + cell_id, {method: "PUT", headers:{
+            'Content-Type': 'application/json',
+        },body: json,})
+        .then(response => response.json())
+        .then(data => {
+            var inputs = document.querySelectorAll('input');
             inputs.forEach(function(input){
-                input.disabled = false;
-            });
-            edit_button.setAttribute("value", "Confirmar");
-            edit_button.setAttribute("id", "chk_btn");
-            edit_button.setAttribute("type", "submit");
-            document.body.querySelector('form').addEventListener('submit', function(event){
-                event.preventDefault()
-                console.log("a");
-                let inputs = this.elements
-                let obj = {}
-                for(let i = 0; i < inputs.length; i++){
-                    if(inputs[i].tagName.toLowerCase() === 'input'){
-                        let key = inputs[i].name
-                        let value = inputs[i].value
-                        obj[key] = value
-                    }
-                }
-                let json = JSON.stringify(obj)
-                console.log(json);
-            })
+            input.disabled = true;
+        });
+            edit_btn.removeAttribute('hidden');
+            confirm_btn.setAttribute('hidden', '');
         })
+        .catch((error) => {console.log(error);})
     })
 }
+
 
 function remove_email(item_id){
     var result = confirm('Deseja mesmo remover este e-mail? ');
     if (result){
         fetch('/delete/' + item_id, {method: 'DELETE'})
         .then(response => response.json())
-        .then(data => {alert('E-mail removido com sucesso!')
-    window.history.go()})
+        .then(data => {
+            console.log('E-mail removido!')
+            alert('E-mail removido com sucesso!')
+            window.history.go()})
     }
 }
 
