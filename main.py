@@ -34,7 +34,7 @@ def get_data(item_id):
     con = get_db()
     cur = con.cursor()
     if len(item_id) > 3:
-        cur.execute(f"SELECT * FROM email_alt.emails WHERE email = '{item_id}@empresaxyz.com.br'")
+        cur.execute(f"SELECT * FROM email_alt.emails WHERE email = '{item_id}@altbrasil.com.br'")
     elif len(item_id) == 3:
         cur.execute(f"SELECT * FROM email_alt.emails WHERE filial = '{item_id.upper()}'")
     item = cur.fetchall()
@@ -123,4 +123,4 @@ def drop_data(item_id):
 
 
 if __name__ == '__main__':
-    app.run(host='192.168.172.227')
+    app.run()
